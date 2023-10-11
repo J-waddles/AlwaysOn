@@ -55,7 +55,7 @@ class MyView(discord.ui.View):
 
             embed = Embed(
                 title="Connected",
-                description=f"Congratulations!\n\nYou are now connected for networking!",
+                description=f"Congratulations, You are now connected! \n\nTime to network!",
                 color=0xdeffee  
             )
             
@@ -133,8 +133,8 @@ async def on_ready():
                 pass
         
         embed = Embed(
-            title="Connection",
-            description="Use the buttons below to connect or disconnect: \n\n Rules:\n1. Provide a positive connection.\n2. Don't share personal or financial information. \n3. Beware of bad actors.\n\n Lets Connect! ",
+            title="1 on 1 Networking",
+            description="Use the buttons below to Connect (queue) or Disconnect (dequeue).\n Then wait for a connection with a random user also looking to network: \n\n Rules:\n1. Provide a positive connection.\n2. Don't share personal or financial information. \n3. Beware of bad actors.\n\n Let's Connect! ",
             color=0xdeffee
         )
         # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
