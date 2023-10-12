@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, tasks
-import json
+import os
 from discord import Embed
 
 from utils.roles import add_role_to_user, remove_role_from_user
@@ -13,9 +13,10 @@ intents = discord.Intents.default()
 intents.guilds = True
 
 
-# Load the config file
-with open('config.json', 'r') as f:
-    config = json.load(f)
+# Load the token
+
+
+TOKEN = os.environ.get("token")
 
 # Initialize the bot
 bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
@@ -140,4 +141,4 @@ async def on_ready():
         await channel.send(embed=embed, view=MyView())
 
 # Run the bot
-bot.run(config['token'])
+bot.run(TOKEN)
