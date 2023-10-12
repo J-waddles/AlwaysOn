@@ -13,22 +13,27 @@ from utils.queue import enqueue_user, dequeue_user, is_pair_available, get_next_
 intents = discord.Intents.default()
 intents.messages = True
 intents.guilds = True
-# intents.message_content = True
+intents.message_content = True
+
+admin_channel_id = None
 
 # Load the env
-TOKEN = os.environ.get("token")
-PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PREFIX is not set
+# TOKEN = os.environ.get("token")
+# PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PREFIX is not set
 
 
 # Initialize the bot
-bot = commands.Bot(command_prefix=PREFIX, intents=intents)
+# bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
 # Load the config file for testing
-# with open('config.json', 'r') as f:
-#     config = json.load(f)
+with open('config.json', 'r') as f:
+    config = json.load(f)
 
 # Initialize the bot
-# bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
+bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
+
+
+
 
 class MyView(discord.ui.View):
     def __init__(self):
@@ -129,26 +134,88 @@ class MyView(discord.ui.View):
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def startnetworking(ctx):
+    global admin_channel_id
+    admin_channel_id = ctx.channel.id
+    await ctx.send(f"Networking bot initiated in this channel: {ctx.channel.name}")
+
+# Listen for messages
+@bot.event
+async def on_message(message):
+    global admin_channel_id  # Declare the variable as global so you can modify it
+
+    # Ignore messages from the bot itself
+    if message.author == bot.user:
+        return
+
+    # Check if the message is the command you're looking for
+    if message.content == "!startnetworking":
+        
+        # Check if the author has admin privileges
+        if message.author.guild_permissions.administrator:
+            
+            # Store the channel ID in the global variable
+            admin_channel_id = message.channel.id
+            
+            # Send a confirmation message
+            await message.channel.send("This channel is now set as the admin channel for networking.")
+
+            
+
+            if admin_channel_id:
+                channel = bot.get_channel(admin_channel_id)
+            
+            
+                if channel:
+                    async for message in channel.history(limit=100):  # Fetch last 100 messages
+                        try:
+                            await message.delete()
+                        except:
+                            pass
+                    
+                    embed = Embed(
+                        title="1 on 1 Networking",
+                        description="Use the buttons below to Connect (queue) or Disconnect (dequeue).\n Then wait for a connection with a random user also looking to network: \n\n Rules:\n1. Provide a positive connection.\n2. Don't share personal or financial information. \n3. Beware of bad actors.\n\n Let's Connect! ",
+                        color=0xdeffee
+                    )
+                    # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
+                    await channel.send(embed=embed, view=MyView())
+
+        else:
+            await message.channel.send("You do not have the permissions to run this command.")
+
 
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}!')
-    channel = bot.get_channel(1154032057056501791)
-    if channel:
-        async for message in channel.history(limit=100):  # Fetch last 100 messages
-            try:
-                await message.delete()
-            except:
-                pass
-        
-        embed = Embed(
-            title="1 on 1 Networking",
-            description="Use the buttons below to Connect (queue) or Disconnect (dequeue).\n Then wait for a connection with a random user also looking to network: \n\n Rules:\n1. Provide a positive connection.\n2. Don't share personal or financial information. \n3. Beware of bad actors.\n\n Let's Connect! ",
-            color=0xdeffee
-        )
-        # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
-        await channel.send(embed=embed, view=MyView())
+    global admin_channel_id  # Declare the variable as global so you can read it
+
+    if admin_channel_id:
+        channel = bot.get_channel(admin_channel_id)
+        await message.channel.send("done")
+    
+    
+        if channel:
+            async for message in channel.history(limit=100):  # Fetch last 100 messages
+                try:
+                    await message.delete()
+                    
+                except:
+                    pass
+            
+            embed = Embed(
+                title="1 on 1 Networking",
+                description="Use the buttons below to Connect (queue) or Disconnect (dequeue).\n Then wait for a connection with a random user also looking to network: \n\n Rules:\n1. Provide a positive connection.\n2. Don't share personal or financial information. \n3. Beware of bad actors.\n\n Let's Connect! ",
+                color=0xdeffee
+            )
+            # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
+            await channel.send(embed=embed, view=MyView())
+
+
+
 
 # Run the bot
-bot.run(TOKEN)
-# bot.run(config['token'])
+# bot.run(TOKEN)
+bot.run(config['token'])
