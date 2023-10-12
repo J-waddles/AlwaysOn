@@ -9,9 +9,9 @@ from utils.queue import enqueue_user, dequeue_user, is_pair_available, get_next_
 
 # Define Intents
 intents = discord.Intents.default()
-intents.messages = True
+
 intents.guilds = True
-intents.message_content = True
+
 
 # Load the config file
 with open('config.json', 'r') as f:
