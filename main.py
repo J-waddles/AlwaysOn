@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands, tasks
-from discord.ui import View, Button
 import os
 from discord import Embed
 
@@ -10,11 +9,10 @@ from utils.queue import enqueue_user, dequeue_user, is_pair_available, get_next_
 
 # Define Intents
 intents = discord.Intents.default()
-
+intents.messages = True
 intents.guilds = True
 
-
-# Load the token and Prefix 
+# Load the env
 TOKEN = os.environ.get("token")
 PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PREFIX is not set
 
