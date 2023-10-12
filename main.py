@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, tasks
-import discord.ui
+from discord.ui import Button, view
 import json
 import os
 from discord import Embed
