@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands, tasks
+import json
 import os
 from discord import Embed
 
@@ -11,6 +12,7 @@ from utils.queue import enqueue_user, dequeue_user, is_pair_available, get_next_
 intents = discord.Intents.default()
 intents.messages = True
 intents.guilds = True
+# intents.message_content = True
 
 # Load the env
 TOKEN = os.environ.get("token")
@@ -19,6 +21,13 @@ PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PRE
 
 # Initialize the bot
 bot = commands.Bot(command_prefix=PREFIX, intents=intents)
+
+# Load the config file for testing
+# with open('config.json', 'r') as f:
+#     config = json.load(f)
+
+# Initialize the bot
+# bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
 
 class MyView(discord.ui.View):
     def __init__(self):
@@ -141,3 +150,4 @@ async def on_ready():
 
 # Run the bot
 bot.run(TOKEN)
+# bot.run(config['token'])
