@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands, tasks
 import json
-
 from discord import Embed
 
 from utils.roles import add_role_to_user, remove_role_from_user
