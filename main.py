@@ -13,13 +13,13 @@ intents = discord.Intents.default()
 intents.guilds = True
 
 
-# Load the token
-
-
+# Load the token and Prefix 
 TOKEN = os.environ.get("token")
+PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PREFIX is not set
+
 
 # Initialize the bot
-bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
+bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
 class MyView(discord.ui.View):
     def __init__(self):
