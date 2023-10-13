@@ -187,13 +187,15 @@ async def on_message(message):
         else:
             await message.channel.send("You do not have the permissions to run this command.")
 
-async def refresh_buttons(bot, message_id, channel_id):
+async def refresh_buttons(channel, message_id):
     while True:
-        await asyncio.sleep(300)  # 5 minutes
-        channel = bot.get_channel(channel_id)
-        message = await channel.fetch_message(message_id)
-        view = MyView()
-        await message.edit(view=view)
+        await asyncio.sleep(300)  # Wait 15 minutes
+        old_message = await channel.fetch_message(message_id)
+        await old_message.delete()
+
+        # Re-send the message and buttons
+        new_message = await channel.send("Click a button", view=MyView())
+        message_id = new_message.id
 
 
 
@@ -221,8 +223,8 @@ async def on_ready():
                 color=0xdeffee
             )
             # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
-            await channel.send(embed=embed, view=MyView())
-            asyncio.create_task(refresh_buttons(bot, message.id, channel.id))
+            message = await channel.send(embed=embed, view=MyView())
+            bot.loop.create_task(refresh_buttons(channel, message.id))
 
 
 
