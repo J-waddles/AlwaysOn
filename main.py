@@ -4,7 +4,6 @@ from discord.ui import Button, view
 import json
 import os
 from discord import Embed
-import asyncio
 
 from utils.roles import add_role_to_user, remove_role_from_user
 from utils.channels import create_private_channel, delete_private_channel, find_channel_by_name
@@ -135,17 +134,6 @@ class MyView(discord.ui.View):
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
-
-async def refresh_buttons(bot, message_id, channel_id):
-    while True:
-        await asyncio.sleep(300)  # 5 minutes
-        channel = bot.get_channel(channel_id)
-        message = await channel.fetch_message(message_id)
-        view = MyView()
-        await message.edit(view=view)
-
-
-
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def startnetworking(ctx):
@@ -224,9 +212,6 @@ async def on_ready():
             )
             # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
             await channel.send(embed=embed, view=MyView())
-
-            # Start the background task for refreshing buttons
-            asyncio.create_task(refresh_buttons(bot, message.id, channel.id))
 
 
 
