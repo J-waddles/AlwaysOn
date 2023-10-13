@@ -13,7 +13,7 @@ async def create_private_channel(guild, channel_name, user1, user2):
         user1: PermissionOverwrite(read_messages=True),
         user2: PermissionOverwrite(read_messages=True),
         guild.me: PermissionOverwrite(read_messages=True, send_messages=True)  # This line gives the bot permission to read and send messages
-}
+    }
     #change category
     category = discord.utils.get(guild.categories, name="╭━━━🖥 Connections 🖥━━━╮")
 
