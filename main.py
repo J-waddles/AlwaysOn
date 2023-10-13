@@ -4,6 +4,7 @@ from discord.ui import Button, view
 import json
 import os
 from discord import Embed
+import asyncio
 
 from utils.roles import add_role_to_user, remove_role_from_user
 from utils.channels import create_private_channel, delete_private_channel, find_channel_by_name
@@ -186,6 +187,15 @@ async def on_message(message):
         else:
             await message.channel.send("You do not have the permissions to run this command.")
 
+async def refresh_buttons(bot, message_id, channel_id):
+    while True:
+        await asyncio.sleep(300)  # 5 minutes
+        channel = bot.get_channel(channel_id)
+        message = await channel.fetch_message(message_id)
+        view = MyView()
+        await message.edit(view=view)
+
+
 
 @bot.event
 async def on_ready():
@@ -212,6 +222,7 @@ async def on_ready():
             )
             # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
             await channel.send(embed=embed, view=MyView())
+            asyncio.create_task(refresh_buttons(bot, message.id, channel.id))
 
 
 
