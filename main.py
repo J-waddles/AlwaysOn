@@ -38,7 +38,7 @@ bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
 class MyView(discord.ui.View):
     def __init__(self):
-        super().__init__(timeout=180)
+        super().__init__()
 
     @discord.ui.button(label='Connect', style=discord.ButtonStyle.secondary, custom_id="connect_button")
     async def connect_button(self, interaction: discord.Interaction, button: discord.ui.Button, ):
@@ -152,7 +152,7 @@ async def on_message(message):
         return
 
     # Check if the message is the command you're looking for
-    if message.content == "!startnetworking":
+    if message.content == "!startON":
         
         # Check if the author has admin privileges
         if message.author.guild_permissions.administrator:
