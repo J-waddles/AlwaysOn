@@ -44,7 +44,6 @@ class MyView(discord.ui.View):
     async def connect_button(self, interaction: discord.Interaction, button: discord.ui.Button, ):
         print(type(interaction), interaction)  # For debugging
         print(type(button), button)  # For debugging
-    
         guild = interaction.guild  # Notice we are using interaction here
         print(guild)  # For debugging
         
@@ -64,7 +63,7 @@ class MyView(discord.ui.View):
 
             print(f"User 1 Object: {user1}, User 2 Object: {user2}")
             
-            channel = await create_private_channel(guild, f'networking-{user1.name}-{user2.name}', user1, user2)
+            channel = await create_private_channel(guild, f'on-{user1.name}-{user2.name}', user1, user2)
             await add_role_to_user(user1, "Connected", guild)
             await add_role_to_user(user2, "Connected", guild)
 
@@ -76,7 +75,7 @@ class MyView(discord.ui.View):
             
             await interaction.response.send_message(embed=embed, ephemeral=True)
             
-
+        
             class ChannelView(discord.ui.View):
                 def __init__(self):
                     super().__init__(timeout=60*60*24)
