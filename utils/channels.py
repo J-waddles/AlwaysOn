@@ -2,16 +2,11 @@ import discord
 from discord import PermissionOverwrite
 
 async def create_private_channel(guild, channel_name, user1, user2):
-    overwrites = {
-        guild.default_role: discord.PermissionOverwrite(read_messages=False),
-        user1: discord.PermissionOverwrite(read_messages=True),
-        user2: discord.PermissionOverwrite(read_messages=True)
-    }
 
     overwrites = {
         guild.default_role: PermissionOverwrite(read_messages=False),
-        user1: PermissionOverwrite(read_messages=True),
-        user2: PermissionOverwrite(read_messages=True),
+        user1: PermissionOverwrite(read_messages=True, send_messages=True),
+        user2: PermissionOverwrite(read_messages=True, send_messages=True),
         guild.me: PermissionOverwrite(read_messages=True, send_messages=True, manage_channels=True)  # This line gives the bot permission to read and send messages
     }
     #change category
