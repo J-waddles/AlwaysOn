@@ -189,7 +189,7 @@ async def on_message(message):
 
 async def refresh_buttons(channel, message_id):
     while True:
-        await asyncio.sleep(300)  # Wait 15 minutes
+        await asyncio.sleep(150)  # Wait 15 minutes
         old_message = await channel.fetch_message(message_id)
         await old_message.delete()
 
@@ -224,7 +224,7 @@ async def on_ready():
             )
             # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
             message = await channel.send(embed=embed, view=MyView())
-            # bot.loop.create_task(refresh_buttons(channel, message.id)) 
+            bot.loop.create_task(refresh_buttons(channel, message.id)) 
 
 
 
