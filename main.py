@@ -224,7 +224,7 @@ async def on_ready():
             )
             # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
             message = await channel.send(embed=embed, view=MyView())
-            bot.loop.create_task(refresh_buttons(channel, message.id)) 
+            bot.loop.create_task(refresh_buttons(channel, message)) 
 
 
 
