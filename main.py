@@ -204,26 +204,26 @@ async def on_ready():
     print(f'Logged in as {bot.user.name}!')
     global admin_channel_id  # Declare the variable as global so you can read it
 
-    if admin_channel_id:
-        channel = bot.get_channel(admin_channel_id)
-        await message.channel.send("done")
+    # if admin_channel_id:
+    #     channel = bot.get_channel(admin_channel_id)
+    #     await message.channel.send("done")
     
     
-        if channel:
-            async for message in channel.history(limit=100):  # Fetch last 100 messages
-                try:
-                    await message.delete()
+    #     if channel:
+    #         async for message in channel.history(limit=100):  # Fetch last 100 messages
+    #             try:
+    #                 await message.delete()
                     
-                except:
-                    pass
+    #             except:
+    #                 pass
             
-            embed = Embed(
-                title="1 on 1 Networking",
-                description="Use the buttons below to Connect (queue) or Disconnect (dequeue).\n Then wait for a connection with a random user also looking to network: \n\n Rules:\n1. Provide a positive connection.\n2. Don't share personal or financial information. \n3. Beware of bad actors.\n\n Let's Connect! ",
-                color=0xdeffee
-            )
-            # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
-            message = await channel.send(embed=embed, view=MyView())
+    #         embed = Embed(
+    #             title="1 on 1 Networking",
+    #             description="Use the buttons below to Connect (queue) or Disconnect (dequeue).\n Then wait for a connection with a random user also looking to network: \n\n Rules:\n1. Provide a positive connection.\n2. Don't share personal or financial information. \n3. Beware of bad actors.\n\n Let's Connect! ",
+    #             color=0xdeffee
+    #         )
+    #         # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
+    #         message = await channel.send(embed=embed, view=MyView())
             # message.id = message
             # bot.loop.create_task(refresh_buttons(channel, message.id)) 
 
