@@ -38,7 +38,7 @@ bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
 class MyView(discord.ui.View):
     def __init__(self):
-        super().__init__(timeout=30)
+        super().__init__(timeout=1800)
 
     @discord.ui.button(label='Connect', style=discord.ButtonStyle.secondary, custom_id="connect_button")
     async def connect_button(self, interaction: discord.Interaction, button: discord.ui.Button, ):
@@ -79,7 +79,7 @@ class MyView(discord.ui.View):
 
             class ChannelView(discord.ui.View):
                 def __init__(self):
-                    super().__init__(timeout=10)
+                    super().__init__(timeout=1800)
 
                 @discord.ui.button(label='Disconnect', style=discord.ButtonStyle.danger, custom_id="disconnect_channel_button")
                 async def disconnect_button(self, interaction: discord.Interaction, button: discord.ui.Button):
