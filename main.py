@@ -164,14 +164,6 @@ async def on_message(message):
     if message.author == bot.user:
         return
     
-    if message.content.startswith('!viewconnections'):
-        admin_role = discord.utils.get(message.guild.roles, name="Admin")  # Replace with your actual admin role name
-        if admin_role in message.author.roles:
-            global connection_channel_id
-            connection_channel_id = message.channel.id
-            await message.channel.send(f"The connection channel has been set to {message.channel.name}.")
-        else:
-            await message.channel.send("You don't have the permissions to set the connection channel.")
 
     # Check if the message is the command you're looking for
     if message.content == "!starton":
@@ -205,9 +197,19 @@ async def on_message(message):
                     )
                     # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
                     await channel.send(embed=embed, view=MyView())
+    
 
         else:
             await message.channel.send("You do not have the permissions to run this command.")
+    
+    if message.content.startswith('!viewconnections'):
+        admin_role = discord.utils.get(message.guild.roles, name="Admin")  # Replace with your actual admin role name
+        if admin_role in message.author.roles:
+            global connection_channel_id
+            connection_channel_id = message.channel.id
+            await message.channel.send(f"The connection channel has been set.")
+        else:
+            await message.channel.send("You don't have the permissions to set the connection channel.")
 
 # async def refresh_buttons(channel, message_id):
 #     while True:
