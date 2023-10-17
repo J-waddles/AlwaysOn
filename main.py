@@ -17,6 +17,7 @@ intents.guilds = True
 intents.message_content = True
 
 admin_channel_id = None
+connection_channel_id = None 
 
 # Load the env
 TOKEN = os.environ.get("token")
@@ -43,6 +44,8 @@ class MyView(discord.ui.View):
     @discord.ui.button(label='Connect', style=discord.ButtonStyle.secondary, custom_id="connect_button")
     async def connect_button(self, interaction: discord.Interaction, button: discord.ui.Button, ):
         guild = interaction.guild  # Notice we are using interaction here
+        global connection_channel_id
+
         
         user = interaction.user
         enqueue_user(user.id)
@@ -66,6 +69,12 @@ class MyView(discord.ui.View):
                 description=f"Congratulations, You are now connected! \n\nTime to network!",
                 color=0xdeffee  
             )
+            if connection_channel_id:
+                channel = bot.get_channel(connection_channel_id)
+                if channel:
+                    await channel.send(f"{user1.mention} and {user2.mention} recently connected!")
+
+
             
             await interaction.response.send_message(embed=embed, ephemeral=True)
             
@@ -135,6 +144,15 @@ async def startnetworking(ctx):
     admin_channel_id = ctx.channel.id
     await ctx.send(f"Networking bot initiated in this channel: {ctx.channel.name}")
 
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def viewconnections(ctx):
+    global connection_channel_id
+    connection_channel_id = ctx.channel.id
+    await ctx.send(f"Set the connection view channel to {ctx.channel.mention}.")
+
+
+
 # Listen for messages
 @bot.event
 async def on_message(message):
@@ -143,6 +161,15 @@ async def on_message(message):
     # Ignore messages from the bot itself
     if message.author == bot.user:
         return
+    
+    if message.content.startswith('!viewconnections'):
+        admin_role = discord.utils.get(message.guild.roles, name="Admin")  # Replace with your actual admin role name
+        if admin_role in message.author.roles:
+            global connection_channel_id
+            connection_channel_id = message.channel.id
+            await message.channel.send(f"The connection channel has been set to {message.channel.name}.")
+        else:
+            await message.channel.send("You don't have the permissions to set the connection channel.")
 
     # Check if the message is the command you're looking for
     if message.content == "!starton":
