@@ -72,11 +72,6 @@ class MyView(discord.ui.View):
             
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
-            if connection_channel_id:
-                channel = bot.get_channel(connection_channel_id)
-                if channel:
-                    await channel.send(f"{user1.mention} and {user2.mention} recently connected!")
-            
         
             class ChannelView(discord.ui.View):
                 def __init__(self):
@@ -121,6 +116,12 @@ class MyView(discord.ui.View):
             )
             
             await interaction.response.send_message(embed=embed, ephemeral=True)
+        
+        if connection_channel_id:
+                channel = bot.get_channel(connection_channel_id)
+                if channel:
+                    await channel.send(f"{user1.mention} and {user2.mention} recently connected!")
+            
 
     @discord.ui.button(label='Disconnect', style=discord.ButtonStyle.danger, custom_id="disconnect_button")
     async def disconnect_button(self, interaction: discord.Interaction, button: discord.ui.Button):
