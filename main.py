@@ -157,6 +157,8 @@ async def viewconnections(ctx):
 @bot.event
 async def on_message(message):
     global admin_channel_id  # Declare the variable as global so you can modify it
+    global connection_channel_id
+
 
     # Ignore messages from the bot itself
     if message.author == bot.user:
