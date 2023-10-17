@@ -69,14 +69,13 @@ class MyView(discord.ui.View):
                 description=f"Congratulations, You are now connected! \n\nTime to network!",
                 color=0xdeffee  
             )
+            
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+
             if connection_channel_id:
                 channel = bot.get_channel(connection_channel_id)
                 if channel:
                     await channel.send(f"{user1.mention} and {user2.mention} recently connected!")
-
-
-            
-            await interaction.response.send_message(embed=embed, ephemeral=True)
             
         
             class ChannelView(discord.ui.View):
