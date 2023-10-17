@@ -4,7 +4,7 @@ from discord.ui import Button, view
 import json
 import os
 from discord import Embed
-import asyncio
+# import asyncio
 
 from utils.roles import add_role_to_user, remove_role_from_user
 from utils.channels import create_private_channel, delete_private_channel, find_channel_by_name
@@ -42,10 +42,7 @@ class MyView(discord.ui.View):
 
     @discord.ui.button(label='Connect', style=discord.ButtonStyle.secondary, custom_id="connect_button")
     async def connect_button(self, interaction: discord.Interaction, button: discord.ui.Button, ):
-        print(type(interaction), interaction)  # For debugging
-        print(type(button), button)  # For debugging
         guild = interaction.guild  # Notice we are using interaction here
-        print(guild)  # For debugging
         
         user = interaction.user
         enqueue_user(user.id)
@@ -54,14 +51,11 @@ class MyView(discord.ui.View):
             user1_id, user2_id = get_next_pair()
             user1 = guild.get_member(user1_id)
             user2 = guild.get_member(user2_id)
-
-            #testing
-            print(f"User 1 ID: {user1_id}, User 2 ID: {user2_id}")
+ 
 
             user1 = await guild.fetch_member(user1_id)
             user2 = await guild.fetch_member(user2_id)
 
-            print(f"User 1 Object: {user1}, User 2 Object: {user2}")
             
             channel = await create_private_channel(guild, f'on-{user1.name}-{user2.name}', user1, user2)
             await add_role_to_user(user1, "Connected", guild)
@@ -151,7 +145,7 @@ async def on_message(message):
         return
 
     # Check if the message is the command you're looking for
-    if message.content == "!startON":
+    if message.content == "!starton":
         
         # Check if the author has admin privileges
         if message.author.guild_permissions.administrator:
