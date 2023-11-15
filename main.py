@@ -48,7 +48,6 @@ class MyView(discord.ui.View):
     async def connect_button(self, interaction: discord.Interaction, button: discord.ui.Button, ):
         guild = interaction.guild  # Notice we are using interaction here
         global connection_channel_id
-        global connection_category_name
 
         
         user = interaction.user
@@ -161,6 +160,8 @@ async def setoncategory(ctx, *, category_name: str):
     global connection_category_name
     connection_category_name = category_name
     await ctx.send(f"Connection category name set to: {category_name}")
+
+
 
 
 # Listen for messages
