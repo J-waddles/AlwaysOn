@@ -18,8 +18,7 @@ intents.message_content = True
 
 admin_channel_id = None
 connection_channel_id = None 
-# Global variable for category name
-connection_category_name = "╭━━━🖥 Connections 🖥━━━╮"  # Replace with your default category name
+
 
 
 # Load the env
@@ -47,7 +46,7 @@ class MyView(discord.ui.View):
     @discord.ui.button(label='Connect', style=discord.ButtonStyle.secondary, custom_id="connect_button")
     async def connect_button(self, interaction: discord.Interaction, button: discord.ui.Button, ):
         guild = interaction.guild  # Notice we are using interaction here
-        global connection_channel_id
+
 
         
         user = interaction.user
@@ -154,12 +153,6 @@ async def viewconnections(ctx):
     connection_channel_id = ctx.channel.id
     await ctx.send(f"Set the connection view channel to {ctx.channel.mention}.")
 
-@bot.command()
-@commands.has_permissions(administrator=True)  # Restrict to admins
-async def setoncategory(ctx, *, category_name: str):
-    global connection_category_name
-    connection_category_name = category_name
-    await ctx.send(f"Connection category name set to: {category_name}")
 
 
 
