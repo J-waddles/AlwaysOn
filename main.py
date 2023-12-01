@@ -32,11 +32,17 @@ if TOKEN:
 
 # Load the config file for Test Bot
 else:
-    with open('config.json', 'r') as f:
-        config = json.load(f)
+    try:
+        with open('config.json', 'r') as f:
+            config = json.load(f)
 
-    # Initialize the Test Bot
-    bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
+        # Initialize the Test Bot
+        bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
+    except FileNotFoundError:
+        print("Config file 'config.json' not found.")
+    except json.JSONDecodeError:
+        print("Error decoding JSON in 'config.json'. Make sure the file is valid JSON.")
+
 
 
 
