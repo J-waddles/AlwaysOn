@@ -22,7 +22,7 @@ connection_channel_id = None
 
 
 # Load the env
-if os.environ.get("token"):
+if os.getenv('token'):
     TOKEN = os.environ.get("token")
     PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PREFIX is not set
 
