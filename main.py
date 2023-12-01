@@ -90,7 +90,7 @@ class MyView(discord.ui.View):
                     await remove_role_from_user(user, "Connected", guild)
 
                     # Delete the private channel
-                    if "networking-" in channel.name:
+                    if "on-" in channel.name:
                         await delete_private_channel(channel)
                         
                     
