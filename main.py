@@ -22,19 +22,21 @@ connection_channel_id = None
 
 
 # Load the env
-TOKEN = os.environ.get("token")
-PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PREFIX is not set
+if os.environ.get("token"):
+    TOKEN = os.environ.get("token")
+    PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PREFIX is not set
 
 
-# Initialize the bot
-bot = commands.Bot(command_prefix=PREFIX, intents=intents)
+    # Initialize the bot
+    bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
 # Load the config file for Test Bot
-with open('config.json', 'r') as f:
-    config = json.load(f)
+else:
+    with open('config.json', 'r') as f:
+        config = json.load(f)
 
-# Initialize the Test Bot
-bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
+    # Initialize the Test Bot
+    bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
 
 
 
@@ -156,7 +158,30 @@ async def viewconnections(ctx):
 ##Close all ON channels at once
 
 ## Close channel of connect
+@bot.command()
+async def disconnect(ctx):
+    user = ctx.author
+    guild = ctx.guild
+    channel = ctx.channel
 
+
+    # Check if command is invoked in the bot's designated channel or a networking channel
+    # Change bot channel
+    if ctx.channel.name != "on-" not in ctx.channel.name:
+        await ctx.send("This command can only be used in the designated bot channel or your current networking channel.")
+        return
+    
+
+    # Remove roles (if any)
+    await remove_role_from_user(user, "Connected", guild)
+
+    # Delete the private channel
+    if "on-" in channel.name:
+        await ctx.send("You've been disconnected.")
+        await delete_private_channel(channel)
+    
+    else:
+        await ctx.send("You're not in a networking channel.")
 
 
 # Listen for messages
