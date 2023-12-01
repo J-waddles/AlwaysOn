@@ -31,7 +31,6 @@ else:
     # Load the config file for Test Bot
     with open('config.json', 'r') as f:
         config = json.load(f)
-    TOKEN = config.testToken
 
     # Initialize the Test Bot
     bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
@@ -306,4 +305,4 @@ if os.getenv("token"):
     bot.run(TOKEN)
 
 else:
-    bot.run(config['token'])
+    bot.run(config['testToken'])
