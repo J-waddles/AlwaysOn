@@ -19,29 +19,39 @@ intents.message_content = True
 admin_channel_id = None
 connection_channel_id = None 
 
-TOKEN = os.environ.get("token")
-
-# Load the env
-if TOKEN:
+if os.environ.get("token"):
+    # Load configuration from environment variables
     TOKEN = os.environ.get("token")
     PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PREFIX is not set
-
-
+    
     # Initialize the bot
     bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
-# Load the config file for Test Bot
 else:
-    try:
-        with open('config.json', 'r') as f:
-            config = json.load(f)
+    # Load the config file for Test Bot
+    with open('config.json', 'r') as f:
+        config = json.load(f)
+    TOKEN = config.testToken
 
-        # Initialize the Test Bot
-        bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
-    except FileNotFoundError:
-        print("Config file 'config.json' not found.")
-    except json.JSONDecodeError:
-        print("Error decoding JSON in 'config.json'. Make sure the file is valid JSON.")
+    # Initialize the Test Bot
+    bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
+# Load the env
+
+TOKEN = os.environ.get("token")
+PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PREFIX is not set
+
+
+# Initialize the bot
+bot = commands.Bot(command_prefix=PREFIX, intents=intents)
+
+# Load the config file for Test Bot
+
+with open('config.json', 'r') as f:
+    config = json.load(f)
+    TOKEN = config.testToken
+
+# Initialize the Test Bot
+bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
 
 
 
@@ -289,10 +299,8 @@ async def on_ready():
             # bot.loop.create_task(refresh_buttons(channel, message.id)) 
 
 
-#run the Test Bot
-bot.run(config['testToken'])
+
 
 # Run the bot
 bot.run(TOKEN)
-
 
