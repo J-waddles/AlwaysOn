@@ -19,7 +19,7 @@ intents.message_content = True
 admin_channel_id = None
 connection_channel_id = None 
 
-if os.environ.get("token"):
+if os.getenv("token"):
     # Load configuration from environment variables
     TOKEN = os.environ.get("token")
     PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PREFIX is not set
@@ -302,8 +302,8 @@ async def on_ready():
 
 
 # Run the bot
-if os.environ.get("token"):
+if os.getenv("token"):
     bot.run(TOKEN)
-    
+
 else:
     bot.run(config['token'])
