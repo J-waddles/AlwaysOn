@@ -29,19 +29,19 @@ PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PRE
 # Initialize the bot
 bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
-# Load the config file for testing
-# with open('config.json', 'r') as f:
-#     config = json.load(f)
+# Load the config file for Test Bot
+with open('config.json', 'r') as f:
+    config = json.load(f)
 
-# Initialize the bot
-# bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
+# Initialize the Test Bot
+bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
 
 
 
 
 class MyView(discord.ui.View):
     def __init__(self):
-        super().__init__(timeout=60*60*24)
+        super().__init__(timeout=60*60*24*5)
 
     @discord.ui.button(label='Connect', style=discord.ButtonStyle.secondary, custom_id="connect_button")
     async def connect_button(self, interaction: discord.Interaction, button: discord.ui.Button, ):
@@ -153,7 +153,9 @@ async def viewconnections(ctx):
     connection_channel_id = ctx.channel.id
     await ctx.send(f"Set the connection view channel to {ctx.channel.mention}.")
 
+##Close all ON channels at once
 
+## Close channel of connect
 
 
 
@@ -256,8 +258,10 @@ async def on_ready():
             # bot.loop.create_task(refresh_buttons(channel, message.id)) 
 
 
-
+#run the Test Bot
+bot.run(config['testToken'])
 
 # Run the bot
 bot.run(TOKEN)
-# bot.run(config['token'])
+
+
