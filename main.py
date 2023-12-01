@@ -37,21 +37,21 @@ else:
     bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
 # Load the env
 
-TOKEN = os.environ.get("token")
-PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PREFIX is not set
+# TOKEN = os.environ.get("token")
+# PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PREFIX is not set
 
 
-# Initialize the bot
-bot = commands.Bot(command_prefix=PREFIX, intents=intents)
+# # Initialize the bot
+# bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
-# Load the config file for Test Bot
+# # Load the config file for Test Bot
 
-with open('config.json', 'r') as f:
-    config = json.load(f)
-    TOKEN = config.testToken
+# with open('config.json', 'r') as f:
+#     config = json.load(f)
+#     TOKEN = config.testToken
 
-# Initialize the Test Bot
-bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
+# # Initialize the Test Bot
+# bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
 
 
 
@@ -302,5 +302,8 @@ async def on_ready():
 
 
 # Run the bot
-bot.run(TOKEN)
-
+if os.environ.get("token"):
+    bot.run(TOKEN)
+    
+else:
+    bot.run(config['token'])
