@@ -19,10 +19,10 @@ intents.message_content = True
 admin_channel_id = None
 connection_channel_id = None 
 
-
+TOKEN = os.environ.get("token")
 
 # Load the env
-if os.getenv('token'):
+if TOKEN:
     TOKEN = os.environ.get("token")
     PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PREFIX is not set
 
