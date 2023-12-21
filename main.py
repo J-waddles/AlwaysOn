@@ -34,31 +34,11 @@ else:
 
     # Initialize the Test Bot
     bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
-# Load the env
-
-# TOKEN = os.environ.get("token")
-# PREFIX = os.environ.get("PREFIX", "!")  # The "!" is a default value in case PREFIX is not set
-
-
-# # Initialize the bot
-# bot = commands.Bot(command_prefix=PREFIX, intents=intents)
-
-# # Load the config file for Test Bot
-
-# with open('config.json', 'r') as f:
-#     config = json.load(f)
-#     TOKEN = config.testToken
-
-# # Initialize the Test Bot
-# bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
-
-
-
 
 
 class MyView(discord.ui.View):
     def __init__(self):
-        super().__init__(timeout=60*60*24*5)
+        super().__init__(timeout=None)
 
     @discord.ui.button(label='Connect', style=discord.ButtonStyle.secondary, custom_id="connect_button")
     async def connect_button(self, interaction: discord.Interaction, button: discord.ui.Button, ):
@@ -94,7 +74,7 @@ class MyView(discord.ui.View):
         
             class ChannelView(discord.ui.View):
                 def __init__(self):
-                    super().__init__(timeout=60*60*24)
+                    super().__init__(timeout=None)
 
                 @discord.ui.button(label='Disconnect', style=discord.ButtonStyle.danger, custom_id="disconnect_channel_button")
                 async def disconnect_button(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -257,15 +237,6 @@ async def on_message(message):
         else:
             await message.channel.send("You don't have the permissions to set the connection channel.")
 
-# async def refresh_buttons(channel, message_id):
-#     while True:
-#         await asyncio.sleep(150)  # Wait 15 minutes
-#         old_message = await channel.fetch_message(message_id)
-#         await old_message.delete()
-
-#         # Re-send the message and buttons
-#         new_message = await channel.send("Click a button", view=MyView())
-#         message_id = new_message.id
 
 
 
@@ -273,29 +244,6 @@ async def on_message(message):
 async def on_ready():
     print(f'Logged in as {bot.user.name}!')
     global admin_channel_id  # Declare the variable as global so you can read it
-
-    # if admin_channel_id:
-    #     channel = bot.get_channel(admin_channel_id)
-    #     await message.channel.send("done")
-    
-    
-    #     if channel:
-    #         async for message in channel.history(limit=100):  # Fetch last 100 messages
-    #             try:
-    #                 await message.delete()
-                    
-    #             except:
-    #                 pass
-            
-    #         embed = Embed(
-    #             title="1 on 1 Networking",
-    #             description="Use the buttons below to Connect (queue) or Disconnect (dequeue).\n Then wait for a connection with a random user also looking to network: \n\n Rules:\n1. Provide a positive connection.\n2. Don't share personal or financial information. \n3. Beware of bad actors.\n\n Let's Connect! ",
-    #             color=0xdeffee
-    #         )
-    #         # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
-    #         message = await channel.send(embed=embed, view=MyView())
-            # message.id = message
-            # bot.loop.create_task(refresh_buttons(channel, message.id)) 
 
 
 
