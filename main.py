@@ -6,6 +6,7 @@ import os
 from discord import Embed
 import re  # Regular expressions module
 from utils import channels
+import functions
 
 CHANNEL_LIMIT = 7  # Maximum number of private channels a user can create
 # import asyncio
@@ -192,49 +193,6 @@ async def invite_user(ctx, member: discord.Member):
         await ctx.send("An error occurred while sending the invitation.")
 
 
-
-
-@bot.command()
-@commands.has_permissions(administrator=True)
-async def startnetworking(ctx):
-    global admin_channel_id
-    admin_channel_id = ctx.channel.id
-    await ctx.send(f"Networking bot initiated in this channel: {ctx.channel.name}")
-
-@bot.command()
-@commands.has_permissions(administrator=True)
-async def viewconnections(ctx):
-    global connection_channel_id
-    connection_channel_id = ctx.channel.id
-    await ctx.send(f"Set the connection view channel to {ctx.channel.mention}.")
-
-##Close all ON channels at once
-
-## Close channel of connect
-@bot.command(name="disconnect")
-async def disconnect(ctx):
-    user = ctx.author
-    guild = ctx.guild
-    channel = ctx.channel
-
-
-    # Check if command is invoked in the bot's designated channel or a networking channel
-    # Change bot channel
-    if ctx.channel.name != "on-" not in ctx.channel.name:
-        await ctx.send("This command can only be used in the designated bot channel or your current networking channel.")
-        return
-    
-
-    # Remove roles (if any)
-    await remove_role_from_user(user, "Connected", guild)
-
-    # Delete the private channel
-    if "on-" in channel.name:
-        await ctx.send("You've been disconnected.")
-        await delete_private_channel(channel)
-    
-    else:
-        await ctx.send("You're not in a networking channel.")
 
 class InviteView(discord.ui.View):
     def __init__(self, channel_id, inviter_id, invitee_id):
