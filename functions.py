@@ -87,3 +87,5 @@ async def disconnect(ctx):
     
     else:
         await ctx.send("You're not in a networking channel.")
+
+        

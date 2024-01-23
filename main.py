@@ -185,12 +185,13 @@ async def invite_user(ctx, member: discord.Member):
             await ctx.send("You don't have permissions to invite users in this channel.")
             return
 
-        view = InviteView(connection_channel_id, ctx.author.id, member.id)
+        view = InviteView(ctx.channel.id, ctx.author.id, member.id)  # Assuming InviteView expects channel ID
         await connection_channel.send(f"{member.mention}, you have been invited to join {ctx.channel.mention} by {ctx.author.mention}.", view=view)
         await ctx.send("Invitation sent.")
     except Exception as e:
         print(f"An error occurred: {e}")
         await ctx.send("An error occurred while sending the invitation.")
+
 
 
 
@@ -209,12 +210,12 @@ class InviteView(discord.ui.View):
 
         # Logic to add the user to the channel
         channel = bot.get_channel(self.channel_id)
-        await channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
+        await channel.set_permissions(interaction.user, read_messages=True, send_messages=True, manage_channels = True)
 
         await interaction.response.send_message(f"You have joined {channel.mention}", ephemeral=True)
 
     @discord.ui.button(label="Decline", style=discord.ButtonStyle.danger)
-    async def decline_button(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def decline_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         # Similar checks and logic for declining the invitation
         if interaction.user.id != self.invitee_id:
             await interaction.response.send_message("You're not the user invited to this channel.", ephemeral=True)
