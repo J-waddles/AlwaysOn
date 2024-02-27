@@ -101,7 +101,7 @@ class MyView(discord.ui.View):
 
             embed = Embed(
                 title="Connected",
-                description=f"Congratulations {user1.mention} and {user2.mention}!\n\nYou are now connected for networking!\n\n When finished please hit 'Disconnect'",
+                description=f"Congratulations {user1.mention} and {user2.mention}!\n\nYou are now connected for networking!\n\n When finished please type !disconnect to delete this channel.",
                 color=0xdeffee  
             )
             
