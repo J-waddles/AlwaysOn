@@ -40,7 +40,7 @@ class MyView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label='Connect', style=discord.ButtonStyle.secondary, custom_id="connect_button")
+    @discord.ui.button(label='Start', style=discord.ButtonStyle.green, custom_id="connect_button")
     async def connect_button(self, interaction: discord.Interaction, button: discord.ui.Button, ):
         guild = interaction.guild  # Notice we are using interaction here
 
@@ -76,28 +76,28 @@ class MyView(discord.ui.View):
                 def __init__(self):
                     super().__init__(timeout=None)
 
-                @discord.ui.button(label='Disconnect', style=discord.ButtonStyle.danger, custom_id="disconnect_channel_button")
-                async def disconnect_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-                    print(type(interaction), interaction)
-                    user = interaction.user
-                    guild = interaction.guild
-                    channel = interaction.channel
+                # @discord.ui.button(label='Disconnect', style=discord.ButtonStyle.danger, custom_id="disconnect_channel_button")
+                # async def disconnect_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+                #     print(type(interaction), interaction)
+                #     user = interaction.user
+                #     guild = interaction.guild
+                #     channel = interaction.channel
 
-                    # Remove roles (if any)
-                    await remove_role_from_user(user, "Connected", guild)
+                #     # Remove roles (if any)
+                #     await remove_role_from_user(user, "Connected", guild)
 
-                    # Delete the private channel
-                    if "on-" in channel.name:
-                        await delete_private_channel(channel)
+                #     # Delete the private channel
+                #     if "on-" in channel.name:
+                #         await delete_private_channel(channel)
                         
                     
-                    embed = Embed(
-                        title="Disconnected",
-                        description="Thank you for connecting!",
-                        color=0xdeffee  
-                    )
+                #     embed = Embed(
+                #         title="Disconnected",
+                #         description="Thank you for connecting!",
+                #         color=0xdeffee  
+                #     )
                     
-                    await interaction.response.send_message(embed=embed, ephemeral=True)
+                #     await interaction.response.send_message(embed=embed, ephemeral=True)
 
             embed = Embed(
                 title="Connected",
@@ -105,7 +105,8 @@ class MyView(discord.ui.View):
                 color=0xdeffee  
             )
             
-            await channel.send(embed=embed, view=ChannelView())
+            # await channel.send(embed=embed, view=ChannelView())
+            await channel.send(embed=embed)
             # await channel.send(f"{user1.mention} and {user2.mention}, you are now connected for networking!", view=ChannelView())
         else:
             embed = Embed(
@@ -136,7 +137,10 @@ class MyView(discord.ui.View):
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
-
+@bot.command(name="disconnect")
+async def disconnect(ctx):
+    channel = ctx.channel
+    await delete_private_channel(channel)
 
 # Listen for messages
 @bot.event
@@ -177,7 +181,7 @@ async def on_message(message):
                     
                     embed = Embed(
                         title="1 on 1 Networking",
-                        description="Use the buttons below to Connect (queue) or Disconnect (dequeue).\n Then wait for a connection with a random user also looking to network: \n\n Rules:\n1. Provide a positive connection.\n2. Don't share personal or financial information. \n3. Beware of bad actors.\n\n Let's Connect! ",
+                        description="Your opportunity to connect with members is about to begin!\n\nClick Start. Then please wait for a connection with a random user also looking to Network! \n\nRules:\n1. Provide a positive connection expereience.\n2. Don't share personal or financial information. \n3. Beware of bad actors. (admin is always here to ping)\n\n Let's Connect! ",
                         color=0xdeffee
                     )
                     # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
