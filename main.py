@@ -202,6 +202,7 @@ async def on_message(message):
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}!')
+    bot.add_view(MyView())
     global admin_channel_id  # Declare the variable as global so you can read it
 
 
