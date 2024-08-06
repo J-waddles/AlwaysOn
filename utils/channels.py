@@ -1,29 +1,26 @@
 import discord
 from discord import PermissionOverwrite
 
-async def create_private_channel(guild, channel_name, user1, user2):
-
+async def create_private_channel(guild, channel_name, user1, user2, category_name):
     overwrites = {
         guild.default_role: PermissionOverwrite(read_messages=False),
         user1: PermissionOverwrite(read_messages=True, send_messages=True),
         user2: PermissionOverwrite(read_messages=True, send_messages=True),
-        guild.me: PermissionOverwrite(read_messages=True, send_messages=True, manage_channels=True)  # This line gives the bot permission to read and send messages
+        guild.me: PermissionOverwrite(read_messages=True, send_messages=True, manage_channels=True)
     }
-    #change category
-    category = discord.utils.get(guild.categories, name="╭━━━🖥 Connections 🖥━━━╮")
-
-    # If the category does not exist, create it
+    
+    # Use the dynamic category name
+    category = discord.utils.get(guild.categories, name=category_name)
+    
     if category is None:
-        category = await guild.create_category("╭━━━🖥 Connections 🖥━━━╮")
-
+        category = await guild.create_category(category_name)
+    
     channel = await guild.create_text_channel(
         name=channel_name,
         overwrites=overwrites,
         category=category
     )
     
-    # channel = await guild.create_text_channel('channel_name', overwrites=overwrites)
-
     return channel
 
 async def delete_private_channel(channel):
@@ -34,4 +31,3 @@ async def find_channel_by_name(guild, channel_name):
         if channel.name == channel_name:
             return channel
     return None
-
