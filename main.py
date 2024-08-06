@@ -41,28 +41,27 @@ class MyView(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(label='Start', style=discord.ButtonStyle.green, custom_id="connect_button")
-    async def connect_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def connect_button(self, interaction: discord.Interaction, button: discord.ui.Button, ):
         guild = interaction.guild  # Notice we are using interaction here
+
+
+        
         user = interaction.user
         enqueue_user(user.id)
         
         if is_pair_available():
             user1_id, user2_id = get_next_pair()
-            
+            user1 = guild.get_member(user1_id)
+            user2 = guild.get_member(user2_id)
+ 
+
             user1 = await guild.fetch_member(user1_id)
             user2 = await guild.fetch_member(user2_id)
 
-            if not user1 or not user2:
-                await interaction.response.send_message("Failed to fetch users from the server.")
-                return
             
-            channel = await create_private_channel(guild, f'on-{user1.name}-{user2.name}')
-            
-            await channel.send(f"{user1.mention} and {user2.mention} recently connected!")
-            await interaction.response.send_message(f"{user1.mention} and {user2.mention}, you have been connected in {channel.mention}!", ephemeral=True)
-        else:
-            await interaction.response.send_message("Waiting for another user to connect.", ephemeral=True)
-
+            channel = await create_private_channel(guild, f'on-{user1.name}-{user2.name}', user1, user2)
+            await add_role_to_user(user1, "Connected", guild)
+            await add_role_to_user(user2, "Connected", guild)
 
             embed = Embed(
                 title="Connected",
