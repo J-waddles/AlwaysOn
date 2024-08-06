@@ -1,10 +1,11 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord.ui import Button, View
 import json
 import os
 from discord import Embed
 
+# import asyncio
 from utils.roles import add_role_to_user, remove_role_from_user
 from utils.channels import create_private_channel, delete_private_channel, find_channel_by_name
 from utils.queue import enqueue_user, dequeue_user, is_pair_available, get_next_pair, remove_user_from_queue
@@ -32,6 +33,30 @@ else:
         config = json.load(f)
     # Initialize the Test Bot
     bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
+
+class ChannelView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label='Disconnect', style=discord.ButtonStyle.danger, custom_id="disconnect_channel_button")
+    async def disconnect_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        user = interaction.user
+        guild = interaction.guild
+        channel = interaction.channel
+        
+        # Remove roles (if any)
+        await remove_role_from_user(user, "Connected", guild)
+        
+        # Delete the private channel
+        if "on-" in channel.name:
+            await delete_private_channel(channel)
+        
+        embed = Embed(
+            title="Disconnected",
+            description="Thank you for connecting!",
+            color=0xdeffee  
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 class MyView(discord.ui.View):
     def __init__(self):
@@ -62,12 +87,13 @@ class MyView(discord.ui.View):
                 )
                 
                 await interaction.response.send_message(embed=embed, ephemeral=True)
+                
                 embed = Embed(
                     title="Connected",
                     description=f"Congratulations {user1.mention} and {user2.mention}!\n\nYou are now connected for networking!\n\n When finished please type !disconnect to delete this channel.",
                     color=0xdeffee  
                 )
-                await channel.send(embed=embed)
+                await channel.send(embed=embed, view=ChannelView())
             else:
                 await interaction.response.send_message("Connection category is not set. Please set it using !viewconnections command.", ephemeral=True)
         else:
@@ -82,52 +108,6 @@ class MyView(discord.ui.View):
             channel = bot.get_channel(connection_channel_id)
             if channel:
                 await channel.send(f"{user1.mention} and {user2.mention} recently connected!")
-class ChannelView(discord.ui.View):
-            def __init__(self):
-                super().__init__(timeout=None)
-            # @discord.ui.button(label='Disconnect', style=discord.ButtonStyle.danger, custom_id="disconnect_channel_button")
-            # async def disconnect_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-            #     print(type(interaction), interaction)
-            #     user = interaction.user
-            #     guild = interaction.guild
-            #     channel = interaction.channel
-            #     # Remove roles (if any)
-            #     await remove_role_from_user(user, "Connected", guild)
-            #     # Delete the private channel
-            #     if "on-" in channel.name:
-            #         await delete_private_channel(channel)
-                    
-                
-            #     embed = Embed(
-            #         title="Disconnected",
-            #         description="Thank you for connecting!",
-            #         color=0xdeffee  
-            #     )
-                
-            #     await interaction.response.send_message(embed=embed, ephemeral=True)
-
-            embed = Embed(
-                title="Connected",
-                description=f"Congratulations {user1.mention} and {user2.mention}!\n\nYou are now connected for networking!\n\n When finished please type !disconnect to delete this channel.",
-                color=0xdeffee  
-            )
-
-            # await channel.send(embed=embed, view=ChannelView())
-            await channel.send(embed=embed)
-            # await channel.send(f"{user1.mention} and {user2.mention}, you are now connected for networking!", view=ChannelView())
-        else:
-            embed = Embed(
-                title="Queued",
-                description="You're in the queue. \nPlease wait for another user to connect with.",
-                color=0xdeffee  
-            )
-            
-            await interaction.response.send_message(embed=embed, ephemeral=True)
-        
-        if connection_channel_id:
-                channel = bot.get_channel(connection_channel_id)
-                if channel:
-                    await channel.send(f"{user1.mention} and {user2.mention} recently connected!")
 
     @discord.ui.button(label='Disconnect', style=discord.ButtonStyle.danger, custom_id="disconnect_button")
     async def disconnect_button(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -170,7 +150,7 @@ async def on_message(message):
                     
                     embed = Embed(
                         title="1 on 1 Networking",
-                        description="Your opportunity to connect with members is about to begin!\n\nClick Start. Then please wait for a connection with a random user also looking to Network! \n\nRules:\n1. Provide a positive connection expereience.\n2. Don't share personal or financial information. \n3. Beware of bad actors. (admin is always here to ping)\n\n Let's Connect! ",
+                        description="Your opportunity to connect with members is about to begin!\n\nClick Start. Then please wait for a connection with a random user also looking to Network! \n\nRules:\n1. Provide a positive connection experience.\n2. Don't share personal or financial information. \n3. Beware of bad actors. (admin is always here to ping)\n\n Let's Connect! ",
                         color=0xdeffee
                     )
                     await channel.send(embed=embed, view=MyView())
