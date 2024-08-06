@@ -5,20 +5,16 @@ import json
 import os
 from discord import Embed
 # import asyncio
-
 from utils.roles import add_role_to_user, remove_role_from_user
 from utils.channels import create_private_channel, delete_private_channel, find_channel_by_name
 from utils.queue import enqueue_user, dequeue_user, is_pair_available, get_next_pair, remove_user_from_queue
-
 # Define Intents
 intents = discord.Intents.default()
 intents.messages = True
 intents.guilds = True
 intents.message_content = True
-
 admin_channel_id = None
 connection_channel_id = None 
-
 if os.getenv("token"):
     # Load configuration from environment variables
     TOKEN = os.environ.get("token")
@@ -26,25 +22,18 @@ if os.getenv("token"):
     
     # Initialize the bot
     bot = commands.Bot(command_prefix=PREFIX, intents=intents)
-
 else:
     # Load the config file for Test Bot
     with open('config.json', 'r') as f:
         config = json.load(f)
-
     # Initialize the Test Bot
     bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
-
-
 class MyView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
-
     @discord.ui.button(label='Start', style=discord.ButtonStyle.green, custom_id="connect_button")
     async def connect_button(self, interaction: discord.Interaction, button: discord.ui.Button, ):
         guild = interaction.guild  # Notice we are using interaction here
-
-
         
         user = interaction.user
         enqueue_user(user.id)
@@ -54,15 +43,12 @@ class MyView(discord.ui.View):
             user1 = guild.get_member(user1_id)
             user2 = guild.get_member(user2_id)
  
-
             user1 = await guild.fetch_member(user1_id)
             user2 = await guild.fetch_member(user2_id)
-
             
             channel = await create_private_channel(guild, f'on-{user1.name}-{user2.name}', user1, user2)
             await add_role_to_user(user1, "Connected", guild)
             await add_role_to_user(user2, "Connected", guild)
-
             embed = Embed(
                 title="Connected",
                 description=f"Congratulations, You are now connected! \n\nTime to network!",
@@ -70,22 +56,18 @@ class MyView(discord.ui.View):
             )
             
             await interaction.response.send_message(embed=embed, ephemeral=True)
-
         
             class ChannelView(discord.ui.View):
                 def __init__(self):
                     super().__init__(timeout=None)
-
                 # @discord.ui.button(label='Disconnect', style=discord.ButtonStyle.danger, custom_id="disconnect_channel_button")
                 # async def disconnect_button(self, interaction: discord.Interaction, button: discord.ui.Button):
                 #     print(type(interaction), interaction)
                 #     user = interaction.user
                 #     guild = interaction.guild
                 #     channel = interaction.channel
-
                 #     # Remove roles (if any)
                 #     await remove_role_from_user(user, "Connected", guild)
-
                 #     # Delete the private channel
                 #     if "on-" in channel.name:
                 #         await delete_private_channel(channel)
@@ -104,7 +86,7 @@ class MyView(discord.ui.View):
                 description=f"Congratulations {user1.mention} and {user2.mention}!\n\nYou are now connected for networking!\n\n When finished please type !disconnect to delete this channel.",
                 color=0xdeffee  
             )
-            
+
             # await channel.send(embed=embed, view=ChannelView())
             await channel.send(embed=embed)
             # await channel.send(f"{user1.mention} and {user2.mention}, you are now connected for networking!", view=ChannelView())
@@ -122,7 +104,6 @@ class MyView(discord.ui.View):
                 if channel:
                     await channel.send(f"{user1.mention} and {user2.mention} recently connected!")
             
-
     @discord.ui.button(label='Disconnect', style=discord.ButtonStyle.danger, custom_id="disconnect_button")
     async def disconnect_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         print(type(button), button)
@@ -134,26 +115,20 @@ class MyView(discord.ui.View):
             description="You've now been removed from the queue. \n\nHope to see you back shortly :)",
             color=0xdeffee  
         )
-
         await interaction.response.send_message(embed=embed, ephemeral=True)
-
 @bot.command(name="disconnect")
 async def disconnect(ctx):
     channel = ctx.channel
     await delete_private_channel(channel)
-
 # Listen for messages
 @bot.event
 async def on_message(message):
     global admin_channel_id  # Declare the variable as global so you can modify it
     global connection_channel_id
-
-
     # Ignore messages from the bot itself
     if message.author == bot.user:
         return
     
-
     # Check if the message is the command you're looking for
     if message.content == "!starton":
         
@@ -165,9 +140,7 @@ async def on_message(message):
             
             # Send a confirmation message
             await message.channel.send("This channel is now set as the admin channel for networking.")
-
             
-
             if admin_channel_id:
                 channel = bot.get_channel(admin_channel_id)
             
@@ -187,7 +160,6 @@ async def on_message(message):
                     # embed.set_thumbnail(url="https://example.com/your-logo.png")  # Replace with the URL of your logo
                     await channel.send(embed=embed, view=MyView())
     
-
         else:
             await message.channel.send("You do not have the permissions to run this command.")
     
@@ -199,22 +171,13 @@ async def on_message(message):
             await message.channel.send(f"The connection channel has been set.")
         else:
             await message.channel.send("You don't have the permissions to set the connection channel.")
-
-
-
-
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}!')
     bot.add_view(MyView())
     global admin_channel_id  # Declare the variable as global so you can read it
-
-
-
-
 # Run the bot
 if os.getenv("token"):
     bot.run(TOKEN)
-
 else:
     bot.run(config['testToken'])
