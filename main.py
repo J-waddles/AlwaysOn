@@ -125,6 +125,19 @@ async def disconnect(ctx):
     channel = ctx.channel
     await delete_private_channel(channel)
 
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def viewconnections(ctx):
+    global connection_channel_id  # Declare the variable as global
+    global connection_category_name  # Declare the variable as global
+    
+    connection_channel_id = ctx.channel.id
+    connection_category_name = ctx.channel.category.name if ctx.channel.category else None
+    
+    await ctx.channel.send(f"The connection channel has been set to {connection_category_name}.")
+
+
+
 @bot.event
 async def on_message(message):
     global admin_channel_id
@@ -157,14 +170,7 @@ async def on_message(message):
         else:
             await message.channel.send("You do not have the permissions to run this command.")
     
-    if message.content.startswith('!viewconnections'):
-        admin_role = discord.utils.get(message.guild.roles, name="Admin")
-        if admin_role in message.author.roles:
-            connection_channel_id = message.channel.id
-            connection_category_name = message.channel.category.name if message.channel.category else None
-            await message.channel.send(f"The connection channel has been set to {connection_category_name}.")
-        else:
-            await message.channel.send("You don't have the permissions to set the connection channel.")
+
     
     await bot.process_commands(message)
 
@@ -172,6 +178,8 @@ async def on_message(message):
 async def on_ready():
     print(f'Logged in as {bot.user.name}!')
     bot.add_view(MyView())
+    bot.add_view(ChannelView())
+
 
 if os.getenv("token"):
     bot.run(TOKEN)
