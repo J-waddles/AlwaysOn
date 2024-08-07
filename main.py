@@ -94,6 +94,11 @@ class MyView(discord.ui.View):
                     color=0xdeffee  
                 )
                 await channel.send(embed=embed, view=ChannelView())
+                
+                if connection_channel_id:
+                    channel = bot.get_channel(connection_channel_id)
+                    if channel:
+                        await channel.send(f"{user1.mention} and {user2.mention} recently connected!")
             else:
                 await interaction.response.send_message("Connection category is not set. Please set it using !viewconnections command.", ephemeral=True)
         else:
@@ -104,10 +109,7 @@ class MyView(discord.ui.View):
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
         
-        if connection_channel_id:
-            channel = bot.get_channel(connection_channel_id)
-            if channel:
-                await channel.send(f"{user1.mention} and {user2.mention} recently connected!")
+        
 
     @discord.ui.button(label='Disconnect', style=discord.ButtonStyle.danger, custom_id="disconnect_button")
     async def disconnect_button(self, interaction: discord.Interaction, button: discord.ui.Button):
