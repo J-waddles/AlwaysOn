@@ -122,6 +122,17 @@ class MyView(discord.ui.View):
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
+@bot.tree.command(name="request_pair", description="Request to be paired with a new network.")
+@commands.has_permissions(administrator=True)
+async def request_pair(interaction: discord.Interaction):
+    embed = Embed(
+        title="1 on 1 Networking",
+        description="Your opportunity to connect with members is about to begin!\n\nClick Start. Then please wait for a connection with a random user also looking to Network! \n\nRules:\n1. Provide a positive connection experience.\n2. Don't share personal or financial information. \n3. Beware of bad actors. (admin is always here to ping)\n\n Let's Connect! ",
+        color=0xdeffee
+    )
+    view = MyView()
+    await interaction.response.send_message(embed=embed, view=view)
+
 @bot.command(name="disconnect")
 async def disconnect(ctx):
     channel = ctx.channel
