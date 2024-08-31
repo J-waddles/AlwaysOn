@@ -23,9 +23,6 @@ async def create_private_channel(guild, channel_name, user1, user2, category_nam
     
     return channel
 
-async def delete_private_channel(channel):
-    await channel.delete()
-
 async def find_channel_by_name(guild, channel_name):
     for channel in guild.channels:
         if channel.name == channel_name:

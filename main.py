@@ -49,7 +49,7 @@ class ChannelView(discord.ui.View):
         
         # Delete the private channel
         if "on-" in channel.name:
-            await delete_private_channel(channel)
+            await channel.delete()
         
         embed = Embed(
             title="Disconnected",
@@ -133,10 +133,21 @@ async def request_pair(interaction: discord.Interaction):
     view = MyView()
     await interaction.response.send_message(embed=embed, view=view)
 
+#deletes the channel
 @bot.command(name="disconnect")
 async def disconnect(ctx):
     channel = ctx.channel
-    await delete_private_channel(channel)
+    prefix = "buddy-" or "on-"
+    if channel.name.startswith(prefix):
+            try:
+                await channel.delete()
+                print(f'Deleted channel: {channel.name}')
+            except discord.Forbidden:
+                print(f'Permission Denied: Cannot delete channel {channel.name}')
+            except discord.HTTPException as e:
+                print(f'HTTP Exception: Failed to delete {channel.name}, {e}')
+    await channel.delete()
+
 
 @bot.command()
 @commands.has_permissions(administrator=True)

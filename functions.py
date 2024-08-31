@@ -51,27 +51,4 @@ async def viewconnections(ctx):
 ##Close all ON channels at once
 
 ## Close channel of connect
-@bot.command()
-async def disconnect(ctx):
-    user = ctx.author
-    guild = ctx.guild
-    channel = ctx.channel
 
-
-    # Check if command is invoked in the bot's designated channel or a networking channel
-    # Change bot channel
-    if ctx.channel.name != "on-" not in ctx.channel.name:
-        await ctx.send("This command can only be used in the designated bot channel or your current networking channel.")
-        return
-    
-
-    # Remove roles (if any)
-    await remove_role_from_user(user, "Connected", guild)
-
-    # Delete the private channel
-    if "on-" in channel.name:
-        await ctx.send("You've been disconnected.")
-        await delete_private_channel(channel)
-    
-    else:
-        await ctx.send("You're not in a networking channel.")
