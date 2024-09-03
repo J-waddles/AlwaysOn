@@ -7,7 +7,7 @@ from discord import Embed
 
 # import asyncio
 from utils.roles import add_role_to_user, remove_role_from_user
-from utils.channels import create_private_channel, delete_private_channel, find_channel_by_name
+from utils.channels import create_private_channel, find_channel_by_name
 from utils.queue import enqueue_user, dequeue_user, is_pair_available, get_next_pair, remove_user_from_queue
 
 # Define Intents
