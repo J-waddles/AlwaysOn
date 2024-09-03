@@ -50,13 +50,7 @@ class ChannelView(discord.ui.View):
         # Delete the private channel
         if "on-" in channel.name:
             await channel.delete()
-        
-        embed = Embed(
-            title="Disconnected",
-            description="Thank you for connecting!",
-            color=0xdeffee  
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+
 
 class MyView(discord.ui.View):
     def __init__(self):
