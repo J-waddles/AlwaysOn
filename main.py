@@ -44,8 +44,6 @@ class ChannelView(discord.ui.View):
         guild = interaction.guild
         channel = interaction.channel
         
-        # Remove roles (if any)
-        await remove_role_from_user(user, "Connected", guild)
         
         # Delete the private channel
         if "on-" in channel.name:
@@ -72,8 +70,6 @@ class MyView(discord.ui.View):
             global connection_category_name
             if connection_category_name:
                 channel = await create_private_channel(guild, f'on-{user1.name}-{user2.name}', user1, user2, connection_category_name)
-                await add_role_to_user(user1, "Connected", guild)
-                await add_role_to_user(user2, "Connected", guild)
                 embed = Embed(
                     title="Connected",
                     description=f"Congratulations, You are now connected! \n\nTime to network!",
