@@ -1,26 +1,22 @@
-# Initialize an empty queue
-user_queue = []
+queues = {}  # Server-specific queues
 
-# Add a user to the queue
-def enqueue_user(user_id):
-    if user_id not in user_queue:
-        user_queue.append(user_id)
+def enqueue_user(server_id, user_id):
+    if server_id not in queues:
+        queues[server_id] = []
+    if user_id not in queues[server_id]:
+        queues[server_id].append(user_id)
 
-# Remove a user from the queue
-def dequeue_user():
-    return user_queue.pop(0) if user_queue else None
+def dequeue_user(server_id):
+    return queues[server_id].pop(0) if queues.get(server_id) and queues[server_id] else None
 
-# Check if the queue has enough users for a pair
-def is_pair_available():
-    return len(user_queue) >= 2
+def is_pair_available(server_id):
+    return len(queues.get(server_id, [])) >= 2
 
-# Get the next pair from the queue
-def get_next_pair():
-    if is_pair_available():
-        return dequeue_user(), dequeue_user()
+def get_next_pair(server_id):
+    if is_pair_available(server_id):
+        return dequeue_user(server_id), dequeue_user(server_id)
     return None, None
 
-# Remove a specific user from the queue
-def remove_user_from_queue(user_id):
-    if user_id in user_queue:
-        user_queue.remove(user_id)
+def remove_user_from_queue(server_id, user_id):
+    if server_id in queues and user_id in queues[server_id]:
+        queues[server_id].remove(user_id)
