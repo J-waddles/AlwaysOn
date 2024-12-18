@@ -208,7 +208,7 @@ class ChannelView(discord.ui.View):
                     f"The networking channel '{channel.name}' has been deleted.", ephemeral=True
                 )
                 await channel.delete()
-                
+
             except discord.Forbidden:
                 await interaction.response.send_message(
                     "I don't have permission to delete this channel.", ephemeral=True
@@ -262,8 +262,29 @@ async def start_on(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed, view=view)
 
 
-async def create_private_channel(guild, channel_name, user1, user2, category_name):
-    """Create a private text channel for two users."""
+async def create_private_channel(guild, channel_name, user1, user2, bot):
+    """Create a private text channel for two users based on the category set by /viewconnections."""
+    # Query the database for the category name
+    category_name = None
+    if bot.mydb:
+        cursor = bot.mydb.cursor()
+        try:
+            cursor.execute("""
+                SELECT category_name FROM channels
+                WHERE server_id = %s AND channel_id = %s;
+            """, (guild.id, bot.connection_channel_id))  # Replace with actual channel_id if needed
+            result = cursor.fetchone()
+            if result:
+                category_name = result[0]
+        except Exception as e:
+            print(f"Database error in create_private_channel: {e}")
+
+    # Locate or create the category
+    category = discord.utils.get(guild.categories, name=category_name)
+    if not category:
+        category = await guild.create_category(category_name)
+
+    # Define channel permissions
     overwrites = {
         guild.default_role: discord.PermissionOverwrite(read_messages=False),
         user1: discord.PermissionOverwrite(read_messages=True, send_messages=True),
@@ -271,17 +292,13 @@ async def create_private_channel(guild, channel_name, user1, user2, category_nam
         guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True, manage_channels=True),
     }
 
-    # Locate or create the category
-    category = discord.utils.get(guild.categories, name=category_name)
-    if not category:
-        category = await guild.create_category(category_name)
-
-    # Create the private channel
+    # Create the private channel under the correct category
     channel = await guild.create_text_channel(
         name=channel_name, overwrites=overwrites, category=category
     )
 
     return channel
+
 
 
 
