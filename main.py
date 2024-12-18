@@ -80,6 +80,7 @@ async def request_pair(interaction: discord.Interaction):
             user2=user2,
             category_name=interaction.channel.category.name
         )
+        #here
         embed = Embed(
             title="Connected",
             description=f"Congratulations, {user1.mention} and {user2.mention}! You are now connected for networking!",
@@ -152,7 +153,7 @@ class MyView(discord.ui.View):
 
                 # Notify the interacting user
                 await interaction.response.send_message(
-                    f"You have been connected with {user2.mention} in channel {channel.name}.",
+                    f"Thank you for getting connected, we have paired you in channel {channel.name}.",
                     ephemeral=True,
                 )
             except Exception as e:
@@ -279,14 +280,6 @@ async def create_private_channel(guild, channel_name, user1, user2, category_nam
     channel = await guild.create_text_channel(
         name=channel_name, overwrites=overwrites, category=category
     )
-
-    # Add the `ChannelView` to the private channel
-    embed = Embed(
-        title="Private Networking Channel",
-        description="This is your private networking space. Use the buttons below to manage this session.",
-        color=0x00FF00,
-    )
-    await channel.send(embed=embed, view=ChannelView())
 
     return channel
 
