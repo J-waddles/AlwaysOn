@@ -182,14 +182,6 @@ class MyView(discord.ui.View):
         # Remove the user from the server-specific queue
         remove_user_from_queue(guild.id, user.id)
 
-        # Notify the user of successful removal
-        embed = Embed(
-            title="Disconnected",
-            description="You have been removed from the queue. Feel free to join again later!",
-            color=0xFF0000,
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
 
 class ChannelView(discord.ui.View):
     def __init__(self):
