@@ -136,20 +136,7 @@ class MyView(discord.ui.View):
                     category_name=category_name,
                 )
 
-                # Embed for the private channel
-                private_embed = Embed(
-                    title="Connected!",
-                    description=(
-                        f"Congratulations, {user1.mention} and {user2.mention}!\n\n"
-                        "You are now connected in this private networking channel.\n"
-                        "Use this space to connect and collaborate.\n\n"
-                        "**Tip:** When you're done, use the 'Disconnect' button below to close this channel."
-                    ),
-                    color=0x00FF00,
-                )
 
-                # Add `ChannelView` to the private channel
-                await channel.send(embed=private_embed, view=ChannelView())
 
                 # Notify the interacting user
                 await interaction.response.send_message(
@@ -272,7 +259,7 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
             cursor.execute("""
                 SELECT category_name FROM channels
                 WHERE server_id = %s AND channel_id = %s;
-            """, (guild.id, bot.connection_channel_id))  # Replace with actual channel_id if needed
+            """, (guild.id, bot.connection_channel_id))  # Replace bot.connection_channel_id with actual saved value
             result = cursor.fetchone()
             if result:
                 category_name = result[0]
@@ -297,7 +284,23 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
         name=channel_name, overwrites=overwrites, category=category
     )
 
+    # Send a welcome message and attach ChannelView
+                # Embed for the private channel
+    private_embed = Embed(
+        title="Connected!",
+        description=(
+            f"Congratulations, {user1.mention} and {user2.mention}!\n\n"
+            "You are now connected in this private networking channel.\n"
+            "Use this space to connect and collaborate.\n\n"
+            "**Tip:** When you're done, use the 'Disconnect' button below to close this channel."
+        ),
+        color=0x00FF00,
+    )
+
+    # Add `ChannelView` to the private channel
+    await channel.send(content=f"{user1.mention} {user2.mention}", embed=private_embed, view=ChannelView())
     return channel
+
 
 
 
