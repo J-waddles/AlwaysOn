@@ -83,7 +83,7 @@ async def view_connections(interaction: discord.Interaction):
             ephemeral=True
         )
 
-# Slash Command: Request Pair@bot.tree.command(name="requestpair", description="Request a pairing with another user.")
+@bot.tree.command(name="requestpair", description="Request a pairing with another user.")
 async def request_pair(interaction: discord.Interaction):
     enqueue_user(interaction.guild.id, interaction.user.id)
     if is_pair_available(interaction.guild.id):
@@ -98,7 +98,7 @@ async def request_pair(interaction: discord.Interaction):
                 channel_name=f'on-{user1.name}-{user2.name}',
                 user1=user1,
                 user2=user2,
-                bot=bot,  # Pass the bot instance for DB access
+                bot=bot  # Pass the bot instance
             )
 
             # Notify the interacting user
@@ -113,6 +113,10 @@ async def request_pair(interaction: discord.Interaction):
             )
     else:
         await interaction.response.send_message("You're in the queue. Waiting for another user to connect with.", ephemeral=True)
+
+
+
+
 # Slash Command: Disconnect
 @bot.tree.command(name="disconnect", description="Disconnect and delete the private channel.")
 async def disconnect(interaction: discord.Interaction):
@@ -149,20 +153,17 @@ class MyView(discord.ui.View):
 
             # Create a private channel for the pair
             try:
-                category_name = interaction.channel.category.name if interaction.channel.category else None
                 channel = await create_private_channel(
                     guild=guild,
-                    channel_name=f"on-{user1.name}-{user2.name}",
+                    channel_name=f'on-{user1.name}-{user2.name}',
                     user1=user1,
                     user2=user2,
-                    category_name=category_name,
+                    bot=interaction.client  # Pass the bot instance
                 )
-
-
 
                 # Notify the interacting user
                 await interaction.response.send_message(
-                    f"Thank you for getting connected, we have paired you in channel {channel.name}.",
+                    f"You have been connected with {user2.mention} in channel {channel.name}.",
                     ephemeral=True,
                 )
             except Exception as e:
@@ -172,15 +173,10 @@ class MyView(discord.ui.View):
                 )
         else:
             # Notify the user they are in the queue
-            queue_embed = Embed(
-                title="Queued",
-                description=(
-                    "You're in the queue. Please wait for another user to connect with.\n\n"
-                    "**Tip:** Stay active and be ready when paired!"
-                ),
-                color=0xFFFF00,
+            await interaction.response.send_message(
+                "You are now in the queue. Waiting for another user to connect with.", ephemeral=True
             )
-            await interaction.response.send_message(embed=queue_embed, ephemeral=True)
+
 
     @discord.ui.button(label="Disconnect", style=discord.ButtonStyle.danger, custom_id="disconnect_button")
     async def disconnect_button(self, interaction: discord.Interaction, button: discord.ui.Button):
