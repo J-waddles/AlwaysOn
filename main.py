@@ -329,7 +329,7 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
             bot.mydb.commit()
         except Exception as e:
             print(f"Error updating user_pair_count: {e}")
-            
+
         # Send a welcome message and attach ChannelView
                 # Embed for the private channel
     private_embed = Embed(
@@ -357,9 +357,6 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
         print("Connection channel ID not set. Unable to send pairing notification.")
 
     return channel
-
-
-
 
 
 
