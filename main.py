@@ -376,6 +376,8 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}!')
+    bot.add_view(MyView())
+    bot.add_view(ChannelView())
     bot.mydb = create_db_connection()
     if bot.mydb:
         initialize_tables(bot.mydb)
