@@ -252,17 +252,17 @@ async def start_on(interaction: discord.Interaction):
 async def create_private_channel(guild, channel_name, user1, user2, bot):
     """Create a private text channel for two users based on the category set by /viewconnections."""
     # Query the database for the category name
-    category_name = None
+    category_name, connection_channel_id = None, None
     if bot.mydb:
         cursor = bot.mydb.cursor()
         try:
             cursor.execute("""
-                SELECT category_name FROM channels
-                WHERE server_id = %s AND channel_id = %s;
-            """, (guild.id, bot.connection_channel_id))  # Replace bot.connection_channel_id with actual saved value
+                SELECT category_name, channel_id FROM channels
+                WHERE server_id = %s;
+            """, (guild.id,))
             result = cursor.fetchone()
             if result:
-                category_name = result[0]
+                category_name, connection_channel_id = result
         except Exception as e:
             print(f"Database error in create_private_channel: {e}")
 
@@ -299,6 +299,15 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
 
     # Add `ChannelView` to the private channel
     await channel.send(content=f"{user1.mention} {user2.mention}", embed=private_embed, view=ChannelView())
+
+        # Send a message to the "viewconnections" channel
+    if connection_channel_id:
+        connection_channel = guild.get_channel(connection_channel_id)
+        if connection_channel:
+            await connection_channel.send(
+                f"New pair connected: {user1.mention} and {user2.mention}. Their private channel: {channel.mention}"
+            )
+
     return channel
 
 
