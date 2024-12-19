@@ -52,20 +52,18 @@ async def view_connections(interaction: discord.Interaction):
     if bot.mydb:
         cursor = bot.mydb.cursor()
         try:
-            # Insert or update the channel and category details
             cursor.execute("""
-                INSERT INTO channels (channel_id, server_id, channel_name, category_name)
-                VALUES (%s, %s, %s, %s)
-                ON DUPLICATE KEY UPDATE channel_name = VALUES(channel_name), category_name = VALUES(category_name);
+                INSERT INTO channels (channel_id, server_id, channel_name, category_name, purpose)
+                VALUES (%s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE channel_name = VALUES(channel_name), category_name = VALUES(category_name), purpose = VALUES(purpose);
             """, (
-                interaction.channel.id,  # Channel ID for notifications
-                interaction.guild.id,    # Server ID
-                interaction.channel.name,  # Channel name
-                interaction.channel.category.name if interaction.channel.category else None  # Category name
+                interaction.channel.id,
+                interaction.guild.id,
+                interaction.channel.name,
+                interaction.channel.category.name if interaction.channel.category else None,
+                'view_connections'
             ))
             bot.mydb.commit()
-
-            # Confirm to the admin
             await interaction.response.send_message(
                 f"The connections channel has been set to '{interaction.channel.name}' "
                 f"under the category '{interaction.channel.category.name if interaction.channel.category else 'None'}'.",
@@ -235,12 +233,17 @@ async def start_on(interaction: discord.Interaction):
     if bot.mydb:
         cursor = bot.mydb.cursor()
         try:
-            # Insert or update the connection channel and category in the database
             cursor.execute("""
-                INSERT INTO channels (channel_id, server_id, channel_name, category_name)
-                VALUES (%s, %s, %s, %s)
-                ON DUPLICATE KEY UPDATE channel_name = VALUES(channel_name), category_name = VALUES(category_name);
-            """, (interaction.channel.id, interaction.guild.id, interaction.channel.name, interaction.channel.category.name if interaction.channel.category else None))
+                INSERT INTO channels (channel_id, server_id, channel_name, category_name, purpose)
+                VALUES (%s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE channel_name = VALUES(channel_name), category_name = VALUES(category_name), purpose = VALUES(purpose);
+            """, (
+                interaction.channel.id,
+                interaction.guild.id,
+                interaction.channel.name,
+                interaction.channel.category.name if interaction.channel.category else None,
+                'networking_bot'
+            ))
             bot.mydb.commit()
         except Error as e:
             await interaction.response.send_message("Failed to initialize the networking system in the database.", ephemeral=True)
@@ -273,16 +276,17 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
     if bot.mydb:
         cursor = bot.mydb.cursor()
         try:
-            # Query the database for the category and channel details
+            # Query only for view_connections purpose
             cursor.execute("""
                 SELECT category_name, channel_id FROM channels
-                WHERE server_id = %s;
-            """, (guild.id,))
+                WHERE server_id = %s AND purpose = %s;
+            """, (guild.id, 'view_connections'))
             result = cursor.fetchone()
             if result:
                 category_name, connection_channel_id = result
             else:
                 raise ValueError("The category or connection channel is not set. Please run `/viewconnections` first.")
+  
         except Exception as e:
             print(f"Database error in create_private_channel: {e}")
             raise
@@ -309,6 +313,23 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
         name=channel_name, overwrites=overwrites, category=category
     )
 
+    # Increment user_pair_count for both users
+    if bot.mydb:
+        try:
+            cursor.execute("""
+                INSERT INTO users (user_id, user_pair_count)
+                VALUES (%s, 1)
+                ON DUPLICATE KEY UPDATE user_pair_count = user_pair_count + 1;
+            """, (user1.id,))
+            cursor.execute("""
+                INSERT INTO users (user_id, user_pair_count)
+                VALUES (%s, 1)
+                ON DUPLICATE KEY UPDATE user_pair_count = user_pair_count + 1;
+            """, (user2.id,))
+            bot.mydb.commit()
+        except Exception as e:
+            print(f"Error updating user_pair_count: {e}")
+            
         # Send a welcome message and attach ChannelView
                 # Embed for the private channel
     private_embed = Embed(
