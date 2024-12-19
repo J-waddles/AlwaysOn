@@ -52,45 +52,67 @@ async def view_connections(interaction: discord.Interaction):
     if bot.mydb:
         cursor = bot.mydb.cursor()
         try:
+            # Insert or update the channel and category details
             cursor.execute("""
                 INSERT INTO channels (channel_id, server_id, channel_name, category_name)
                 VALUES (%s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE channel_name = VALUES(channel_name), category_name = VALUES(category_name);
-            """, (interaction.channel.id, interaction.guild.id, interaction.channel.name, interaction.channel.category.name if interaction.channel.category else None))
+            """, (
+                interaction.channel.id,  # Channel ID for notifications
+                interaction.guild.id,    # Server ID
+                interaction.channel.name,  # Channel name
+                interaction.channel.category.name if interaction.channel.category else None  # Category name
+            ))
             bot.mydb.commit()
-            await interaction.response.send_message(f"The connection channel has been set to '{interaction.channel.name}' under category '{interaction.channel.category.name}'.", ephemeral=True)
-        except Error as e:
-            await interaction.response.send_message("Failed to update connection details in the database.", ephemeral=True)
-            print(f"Database error in view_connections: {e}")
-    else:
-        await interaction.response.send_message("Database is not connected.", ephemeral=True)
 
-# Slash Command: Request Pair
-@bot.tree.command(name="requestpair", description="Request a pairing with another user.")
+            # Confirm to the admin
+            await interaction.response.send_message(
+                f"The connections channel has been set to '{interaction.channel.name}' "
+                f"under the category '{interaction.channel.category.name if interaction.channel.category else 'None'}'.",
+                ephemeral=True
+            )
+        except Error as e:
+            await interaction.response.send_message(
+                "Failed to update connection details in the database. Please check the logs.",
+                ephemeral=True
+            )
+            print(f"Database error in /viewconnections: {e}")
+    else:
+        await interaction.response.send_message(
+            "Database is not connected. Please check the bot's setup.",
+            ephemeral=True
+        )
+
+# Slash Command: Request Pair@bot.tree.command(name="requestpair", description="Request a pairing with another user.")
 async def request_pair(interaction: discord.Interaction):
     enqueue_user(interaction.guild.id, interaction.user.id)
     if is_pair_available(interaction.guild.id):
         user1_id, user2_id = get_next_pair(interaction.guild.id)
         user1 = await interaction.guild.fetch_member(user1_id)
         user2 = await interaction.guild.fetch_member(user2_id)
-        channel = await create_private_channel(
-            guild=interaction.guild,
-            channel_name=f'on-{user1.name}-{user2.name}',
-            user1=user1,
-            user2=user2,
-            category_name=interaction.channel.category.name
-        )
-        #here
-        embed = Embed(
-            title="Connected",
-            description=f"Congratulations, {user1.mention} and {user2.mention}! You are now connected for networking!",
-            color=0x00FF00
-        )
-        await channel.send(embed=embed)
-        await interaction.response.send_message(f"You are now connected in channel {channel.name}.", ephemeral=True)
+
+        # Create a private channel for the pair
+        try:
+            channel = await create_private_channel(
+                guild=interaction.guild,
+                channel_name=f'on-{user1.name}-{user2.name}',
+                user1=user1,
+                user2=user2,
+                bot=bot,  # Pass the bot instance for DB access
+            )
+
+            # Notify the interacting user
+            await interaction.response.send_message(
+                f"You are now connected in channel {channel.name}.",
+                ephemeral=True,
+            )
+        except Exception as e:
+            print(f"Error creating private channel: {e}")
+            await interaction.response.send_message(
+                "Failed to create a private channel. Please contact an admin.", ephemeral=True
+            )
     else:
         await interaction.response.send_message("You're in the queue. Waiting for another user to connect with.", ephemeral=True)
-
 # Slash Command: Disconnect
 @bot.tree.command(name="disconnect", description="Disconnect and delete the private channel.")
 async def disconnect(interaction: discord.Interaction):
@@ -251,11 +273,11 @@ async def start_on(interaction: discord.Interaction):
 
 async def create_private_channel(guild, channel_name, user1, user2, bot):
     """Create a private text channel for two users based on the category set by /viewconnections."""
-    # Query the database for the category name
     category_name, connection_channel_id = None, None
     if bot.mydb:
         cursor = bot.mydb.cursor()
         try:
+            # Query the database for the category and channel details
             cursor.execute("""
                 SELECT category_name, channel_id FROM channels
                 WHERE server_id = %s;
@@ -263,8 +285,15 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
             result = cursor.fetchone()
             if result:
                 category_name, connection_channel_id = result
+            else:
+                raise ValueError("The category or connection channel is not set. Please run `/viewconnections` first.")
         except Exception as e:
             print(f"Database error in create_private_channel: {e}")
+            raise
+
+    # Validate category_name
+    if not category_name:
+        raise ValueError("The category for private channels is not set. Please run `/viewconnections` first.")
 
     # Locate or create the category
     category = discord.utils.get(guild.categories, name=category_name)
@@ -284,7 +313,7 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
         name=channel_name, overwrites=overwrites, category=category
     )
 
-    # Send a welcome message and attach ChannelView
+        # Send a welcome message and attach ChannelView
                 # Embed for the private channel
     private_embed = Embed(
         title="Connected!",
@@ -300,15 +329,19 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
     # Add `ChannelView` to the private channel
     await channel.send(content=f"{user1.mention} {user2.mention}", embed=private_embed, view=ChannelView())
 
-        # Send a message to the "viewconnections" channel
+    # Notify the view connections channel about the pairing
     if connection_channel_id:
         connection_channel = guild.get_channel(connection_channel_id)
         if connection_channel:
             await connection_channel.send(
                 f"New pair connected: {user1.mention} and {user2.mention}. Their private channel: {channel.mention}"
             )
+    else:
+        print("Connection channel ID not set. Unable to send pairing notification.")
 
     return channel
+
+
 
 
 
