@@ -271,12 +271,12 @@ async def start_on(interaction: discord.Interaction):
 
 
 async def create_private_channel(guild, channel_name, user1, user2, bot):
-    """Create a private text channel for two users based on the category set by /viewconnections."""
+    """Create a private text channel and update pair counts in server-specific and global tables."""
     category_name, connection_channel_id = None, None
     if bot.mydb:
         cursor = bot.mydb.cursor()
         try:
-            # Query only for view_connections purpose
+            # Query the category and connection channel set by /viewconnections
             cursor.execute("""
                 SELECT category_name, channel_id FROM channels
                 WHERE server_id = %s AND purpose = %s;
@@ -286,7 +286,6 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
                 category_name, connection_channel_id = result
             else:
                 raise ValueError("The category or connection channel is not set. Please run `/viewconnections` first.")
-  
         except Exception as e:
             print(f"Database error in create_private_channel: {e}")
             raise
@@ -313,25 +312,38 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
         name=channel_name, overwrites=overwrites, category=category
     )
 
-    # Increment user_pair_count for both users
+    # Update server-specific and global pair counts
     if bot.mydb:
         try:
+            # Server-Specific Pair Count
             cursor.execute("""
-                INSERT INTO users (user_id, user_pair_count)
+                INSERT INTO server_user_data (server_id, user_id, pair_count)
+                VALUES (%s, %s, 1)
+                ON DUPLICATE KEY UPDATE pair_count = pair_count + 1;
+            """, (guild.id, user1.id))
+            cursor.execute("""
+                INSERT INTO server_user_data (server_id, user_id, pair_count)
+                VALUES (%s, %s, 1)
+                ON DUPLICATE KEY UPDATE pair_count = pair_count + 1;
+            """, (guild.id, user2.id))
+
+            # Global Pair Count
+            cursor.execute("""
+                INSERT INTO users (user_id, global_pair_count)
                 VALUES (%s, 1)
-                ON DUPLICATE KEY UPDATE user_pair_count = user_pair_count + 1;
+                ON DUPLICATE KEY UPDATE global_pair_count = global_pair_count + 1;
             """, (user1.id,))
             cursor.execute("""
-                INSERT INTO users (user_id, user_pair_count)
+                INSERT INTO users (user_id, global_pair_count)
                 VALUES (%s, 1)
-                ON DUPLICATE KEY UPDATE user_pair_count = user_pair_count + 1;
+                ON DUPLICATE KEY UPDATE global_pair_count = global_pair_count + 1;
             """, (user2.id,))
             bot.mydb.commit()
         except Exception as e:
-            print(f"Error updating user_pair_count: {e}")
+            print(f"Error updating pair counts: {e}")
 
-        # Send a welcome message and attach ChannelView
-                # Embed for the private channel
+    # Send a welcome message and attach ChannelView
+    # Embed for the private channel
     private_embed = Embed(
         title="Connected!",
         description=(
