@@ -406,7 +406,28 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
 
     return channel
 
+async def add_existing_servers_to_db(bot):
+    """Add existing servers to the new database."""
+    db_connection = create_db_connection()
+    if not db_connection:
+        print("Failed to connect to the database.")
+        return
 
+    cursor = db_connection.cursor()
+    try:
+        for guild in bot.guilds:
+            cursor.execute("""
+                INSERT INTO servers (server_id, server_name, active)
+                VALUES (%s, %s, %s)
+                ON DUPLICATE KEY UPDATE active = TRUE;
+            """, (guild.id, guild.name, True))
+        db_connection.commit()
+        print("Existing servers added to the database.")
+    except Exception as e:
+        print(f"Error adding servers to the database: {e}")
+    finally:
+        cursor.close()
+        db_connection.close()
 
 
 
@@ -424,6 +445,7 @@ async def on_ready():
         print("Slash commands synced successfully!")
     except Exception as e:
         print(f"Failed to sync commands: {e}")
+    await add_existing_servers_to_db(bot)
 
 
 
