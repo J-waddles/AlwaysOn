@@ -372,6 +372,14 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
             VALUES (%s, 1)
             ON DUPLICATE KEY UPDATE global_pair_count = global_pair_count + 1;
         """, (user2.id,))
+
+        # Increment the total pair count for the server
+        cursor.execute("""
+            UPDATE servers
+            SET user_pair_count = user_pair_count + 1
+            WHERE server_id = %s;
+        """, (guild.id,))
+        
         db_connection.commit()
     except Exception as e:
         print(f"Error updating pair counts: {e}")
