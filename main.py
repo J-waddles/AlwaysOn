@@ -30,6 +30,24 @@ else:
     with open('config.json', 'r') as f:
         config = json.load(f)
 
+        
+import mysql.connector
+from mysql.connector import Error
+
+def create_db_connection():
+    """Create and return a new MySQL database connection."""
+    try:
+        return mysql.connector.connect(
+            host=os.getenv("MYSQL_HOST"),
+            user=os.getenv("MYSQL_USER"),
+            password=os.getenv("MYSQL_PASSWORD"),
+            database=os.getenv("MYSQL_DB"),
+            port=os.getenv("PORT")
+        )
+    except Error as e:
+        print(f"Error connecting to MySQL: {e}")
+        return None
+
 @bot.event
 async def on_guild_join(guild):
     if bot.mydb:
@@ -49,8 +67,9 @@ async def on_guild_join(guild):
 @bot.tree.command(name="viewconnections", description="Set the connection channel and category.")
 @app_commands.default_permissions(administrator=True)
 async def view_connections(interaction: discord.Interaction):
-    if bot.mydb:
-        cursor = bot.mydb.cursor()
+    db_connection = create_db_connection()  # Connect to the database
+    if db_connection:
+        cursor = db_connection.cursor()
         try:
             cursor.execute("""
                 INSERT INTO channels (channel_id, server_id, channel_name, category_name, purpose)
@@ -63,7 +82,7 @@ async def view_connections(interaction: discord.Interaction):
                 interaction.channel.category.name if interaction.channel.category else None,
                 'view_connections'
             ))
-            bot.mydb.commit()
+            db_connection.commit()
             await interaction.response.send_message(
                 f"The connections channel has been set to '{interaction.channel.name}' "
                 f"under the category '{interaction.channel.category.name if interaction.channel.category else 'None'}'.",
@@ -75,6 +94,9 @@ async def view_connections(interaction: discord.Interaction):
                 ephemeral=True
             )
             print(f"Database error in /viewconnections: {e}")
+        finally:
+            cursor.close()
+            db_connection.close()
     else:
         await interaction.response.send_message(
             "Database is not connected. Please check the bot's setup.",
@@ -230,8 +252,9 @@ class ChannelView(discord.ui.View):
 async def start_on(interaction: discord.Interaction):
     """Initialize the friendly UI Views and start the networking system."""
     # Check if the bot is connected to the database
-    if bot.mydb:
-        cursor = bot.mydb.cursor()
+    db_connection = create_db_connection()  # Connect to the database
+    if db_connection:
+        cursor = db_connection.cursor()
         try:
             cursor.execute("""
                 INSERT INTO channels (channel_id, server_id, channel_name, category_name, purpose)
@@ -244,11 +267,14 @@ async def start_on(interaction: discord.Interaction):
                 interaction.channel.category.name if interaction.channel.category else None,
                 'networking_bot'
             ))
-            bot.mydb.commit()
+            db_connection.commit()
         except Error as e:
             await interaction.response.send_message("Failed to initialize the networking system in the database.", ephemeral=True)
             print(f"Database error in /starton: {e}")
             return
+        finally:
+            cursor.close()
+            db_connection.close()
 
     # Create the friendly UI Views
     embed = Embed(
@@ -273,22 +299,25 @@ async def start_on(interaction: discord.Interaction):
 async def create_private_channel(guild, channel_name, user1, user2, bot):
     """Create a private text channel and update pair counts in server-specific and global tables."""
     category_name, connection_channel_id = None, None
-    if bot.mydb:
-        cursor = bot.mydb.cursor()
-        try:
-            # Query the category and connection channel set by /viewconnections
-            cursor.execute("""
-                SELECT category_name, channel_id FROM channels
-                WHERE server_id = %s AND purpose = %s;
-            """, (guild.id, 'view_connections'))
-            result = cursor.fetchone()
-            if result:
-                category_name, connection_channel_id = result
-            else:
-                raise ValueError("The category or connection channel is not set. Please run `/viewconnections` first.")
-        except Exception as e:
-            print(f"Database error in create_private_channel: {e}")
-            raise
+    db_connection = create_db_connection()  # Connect to the database
+    if not db_connection:
+        raise ValueError("Database connection could not be established. Please check your setup.")
+
+    cursor = db_connection.cursor()
+    try:
+        # Query the category and connection channel set by /viewconnections
+        cursor.execute("""
+            SELECT category_name, channel_id FROM channels
+            WHERE server_id = %s AND purpose = %s;
+        """, (guild.id, 'view_connections'))
+        result = cursor.fetchone()
+        if result:
+            category_name, connection_channel_id = result
+        else:
+            raise ValueError("The category or connection channel is not set. Please run `/viewconnections` first.")
+    except Exception as e:
+        print(f"Database error in create_private_channel: {e}")
+        raise
 
     # Validate category_name
     if not category_name:
@@ -312,38 +341,45 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
         name=channel_name, overwrites=overwrites, category=category
     )
 
-    # Update server-specific and global pair counts
-    if bot.mydb:
-        try:
-            # Server-Specific Pair Count
-            cursor.execute("""
-                INSERT INTO server_user_data (server_id, user_id, pair_count)
-                VALUES (%s, %s, 1)
-                ON DUPLICATE KEY UPDATE pair_count = pair_count + 1;
-            """, (guild.id, user1.id))
-            cursor.execute("""
-                INSERT INTO server_user_data (server_id, user_id, pair_count)
-                VALUES (%s, %s, 1)
-                ON DUPLICATE KEY UPDATE pair_count = pair_count + 1;
-            """, (guild.id, user2.id))
+    # Reconnect to the database to update pair counts
+    db_connection = create_db_connection()
+    if not db_connection:
+        print("Failed to reconnect to the database for updating pair counts.")
+        return channel
 
-            # Global Pair Count
-            cursor.execute("""
-                INSERT INTO users (user_id, global_pair_count)
-                VALUES (%s, 1)
-                ON DUPLICATE KEY UPDATE global_pair_count = global_pair_count + 1;
-            """, (user1.id,))
-            cursor.execute("""
-                INSERT INTO users (user_id, global_pair_count)
-                VALUES (%s, 1)
-                ON DUPLICATE KEY UPDATE global_pair_count = global_pair_count + 1;
-            """, (user2.id,))
-            bot.mydb.commit()
-        except Exception as e:
-            print(f"Error updating pair counts: {e}")
+    cursor = db_connection.cursor()
+    try:
+        # Update server-specific pair counts
+        cursor.execute("""
+            INSERT INTO server_user_data (server_id, user_id, pair_count)
+            VALUES (%s, %s, 1)
+            ON DUPLICATE KEY UPDATE pair_count = pair_count + 1;
+        """, (guild.id, user1.id))
+        cursor.execute("""
+            INSERT INTO server_user_data (server_id, user_id, pair_count)
+            VALUES (%s, %s, 1)
+            ON DUPLICATE KEY UPDATE pair_count = pair_count + 1;
+        """, (guild.id, user2.id))
+
+        # Update global pair counts
+        cursor.execute("""
+            INSERT INTO users (user_id, global_pair_count)
+            VALUES (%s, 1)
+            ON DUPLICATE KEY UPDATE global_pair_count = global_pair_count + 1;
+        """, (user1.id,))
+        cursor.execute("""
+            INSERT INTO users (user_id, global_pair_count)
+            VALUES (%s, 1)
+            ON DUPLICATE KEY UPDATE global_pair_count = global_pair_count + 1;
+        """, (user2.id,))
+        db_connection.commit()
+    except Exception as e:
+        print(f"Error updating pair counts: {e}")
+    finally:
+        cursor.close()
+        db_connection.close()  # Ensure the connection is closed after updating
 
     # Send a welcome message and attach ChannelView
-    # Embed for the private channel
     private_embed = Embed(
         title="Connected!",
         description=(
@@ -369,6 +405,7 @@ async def create_private_channel(guild, channel_name, user1, user2, bot):
         print("Connection channel ID not set. Unable to send pairing notification.")
 
     return channel
+
 
 
 
